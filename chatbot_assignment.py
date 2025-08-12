@@ -1,9 +1,22 @@
 import streamlit as st
 from openai import OpenAI
 import os
+from dotenv import load_dotenv
+
+# .env 파일의 값을 환경변수로 자동 등록
+load_dotenv()
 
 # openai api key 받기 -> client 설정
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+# 모델 옵션
+MODEL_OPTIONS = [
+    'chatgpt-4o-latest',
+    'gpt-4',
+    'gpt-3.5-turbo'
+]
+
+selected_model = st.sidebar.radio("Select Model", MODEL_OPTIONS, index=2)
 
 # 초기 상태(=대화 X)에서 초기 messages 생성
 if 'messages' not in st.session_state:
@@ -22,7 +35,7 @@ if prompt := st.chat_input("질문을 입력하세요."):
     # openai로부터 답변 받기
     completion = client.chat.completions.create(
         # 사용할 모델 설정
-        model='chatgpt-4o-latest',
+        model=selected_model,
 
         # 받은 프롬프트를 messages로 설정
         messages = st.session_state.messages,
@@ -30,6 +43,9 @@ if prompt := st.chat_input("질문을 입력하세요."):
         # 답변의 최대 토큰 길이 설정
         # max_tokens = 100
     )
+
+    # logger
+    print(selected_model)
 
     # 답변 저장
     response = completion.choices[0].message.content
