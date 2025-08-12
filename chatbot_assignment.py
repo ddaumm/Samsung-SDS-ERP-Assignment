@@ -44,12 +44,24 @@ if prompt := st.chat_input("질문을 입력하세요."):
         # max_tokens = 100
     )
 
-    # logger
-    print(selected_model)
+    with st.chat_message('assistant'):
+        message_placeholder = st.empty()
+        full_response = ""
+
+        for chunk in client.chat.completions.create(
+            model=selected_model,
+            messages=st.session_state.messages,
+            stream=True
+        ):
+            content = getattr(chunk.choices[0].delta, "content", "") or ""
+            full_response += content
+            message_placeholder.markdown(full_response +" ▌")
+
+        message_placeholder.markdown(full_response)
 
     # 답변 저장
-    response = completion.choices[0].message.content
+    # response = completion.choices[0].message.content
 
     # 답변 화면에 띄우기
-    st.session_state.messages.append({'role':'assistant', 'content':response})
-    st.chat_message('assistant').write(response)
+    st.session_state.messages.append({'role':'assistant', 'content':full_response})
+    # st.chat_message('assistant').write(response)
