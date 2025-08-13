@@ -28,22 +28,11 @@ for message in st.session_state.messages:
 
 # 프롬프트 입력 받기
 if prompt := st.chat_input("질문을 입력하세요."):
-    # 프롬프트 화면에 띄우기
+    # 프롬프트 기록 & 화면에 생성
     st.session_state.messages.append({'role':'user', 'content':prompt})
     st.chat_message('user').write(prompt)
 
-    # openai로부터 답변 받기
-    completion = client.chat.completions.create(
-        # 사용할 모델 설정
-        model=selected_model,
-
-        # 받은 프롬프트를 messages로 설정
-        messages = st.session_state.messages,
-
-        # 답변의 최대 토큰 길이 설정
-        # max_tokens = 100
-    )
-
+    # 답변을 실시간으로 생성
     with st.chat_message('assistant'):
         message_placeholder = st.empty()
         full_response = ""
@@ -59,9 +48,5 @@ if prompt := st.chat_input("질문을 입력하세요."):
 
         message_placeholder.markdown(full_response)
 
-    # 답변 저장
-    # response = completion.choices[0].message.content
-
-    # 답변 화면에 띄우기
+    # 답변 기록
     st.session_state.messages.append({'role':'assistant', 'content':full_response})
-    # st.chat_message('assistant').write(response)
