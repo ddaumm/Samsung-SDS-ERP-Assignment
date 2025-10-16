@@ -56,7 +56,10 @@ def create_rag_tool(file_path, encoding, chunk_size, chunk_overlap, retriever_na
         # 추후 persist_directory 지정해서, 로컬에 저장하도록 하기 -> 이미 db가 있는 경우, 해당 db를 load 후에 retriever 생성하기
         vectorestore = Chroma.from_documents(
             documents=documents,
-            embedding=OpenAIEmbeddings(api_key=OPENAI_API_KEY),
+            embedding=OpenAIEmbeddings(
+                model='text-embedding-3-small', 
+                api_key=OPENAI_API_KEY
+            ),
             persist_directory=f"{file_name}_chroma_db",
             collection_name=file_name
         )
