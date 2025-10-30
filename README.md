@@ -7,6 +7,9 @@
 - Gmail : (메일 수신) 수업 관련 내용 확인 및 요약 / (메일 송신) 수업 관련 메일 전송 기능 & 템플릿 추천 기능
 - Google Calendar : (일정 확인) 수업 관련 일정 확인 및 요약 / (일정 추가 및 편집) 수업 관련 일정 추가 및 편집
 - Google Web Search : 교수/조교 연락처 웹 검색 (RAG 문서를 통해 정보를 구하기 어려운 경우)
+- SNU Life : 강의 후기 검색 -> 후기 내용 요약 / 족보 다운로드
+- 관련 페이지 연결 : sugang.snu.ac.kr, snutt, everytime, snulife 등?
+- 지도(굳이 필요한가...? 주제와의 관련성 떨어지긴 함) : 지도 검색 및 길찾기 기능 (카카오맵 api 활용 가능할 듯!)
 - 보안 : getpass로 pw/id 받기 -> chat history와 분리
 
 # Pipeline
