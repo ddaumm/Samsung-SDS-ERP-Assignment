@@ -23,3 +23,31 @@
 - 메모리 -> bufferwindow or summarymemory 등으로 효율적 관리
 - 도메인 관련, 에이전트의 역할 및 목적 부여 프롬프트 추가 (https://davi06000.tistory.com/173)
 - test 진행하면서, 모델 적절히 설정 (3.5가 잘 수행 못하면 -> 4로 변경, embedding도 마찬가지)
+
+**Deliverables**
+- 프로젝트  결과  보고서 (PPT)
+    - ① 문제정의 & 사용자 시나리오
+    - ② 시스템 동작 구조
+        - Ex. Task 1: 수집→정제→요약→표시
+    - ③ **가설 카드 (3개)**
+        - 아래 설명 참조
+    - ⑤ 실제 작동 예시
+    - ⑥ 결론
+- 사용한 소스코드 프로젝트
+- 프로젝트 최종 발표 영상 (15 min)
+
+1. 과제 개요
+    - 지식 기반 멀티 에이전트 AI 시스템 Pilot
+    - 도메인 선정
+    - 시스템 Architecture
+2. 시스템 동작 구조
+    - Langchain ReAct
+    - RAG
+    - 개별적으로 정의한 Tool: SNULIFE 웹 크롤링, Gmail/Calendar, Google Search
+    - 챗봇 UI: Streamlit
+3. 주요 이슈 및 해결 과정 (Challenges & Solutions)
+    - 잘못된 도구 호출(사용) -> Negative Constraints & Description 등
+    - 환각(Hallucination) -> Context Injection & Wrapper Function 등
+3. 시스템 데모 영상
+    - 시나리오 별 데모 영상
+    - (복합 시나리오)
