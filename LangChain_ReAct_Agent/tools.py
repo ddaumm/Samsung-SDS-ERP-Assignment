@@ -366,7 +366,7 @@ def search_snulife_reference(query_str):
         time.sleep(2)
 
         # 검색 (인덱스만 있는 경우는 이전 검색을 가정할 수 없으므로 에러 처리하거나 로직 보완 필요)
-        if not target_title and target_index != -1:
+        if not target_title:
              return "강의명을 알 수 없어 바로 선택할 수 없습니다. '강의명 | 번호'로 입력해주세요."
 
         search_input_xpath = '//*[@id="__next"]/div/div[2]/div[2]/div[2]/div[1]/div[1]/div/form/input'
