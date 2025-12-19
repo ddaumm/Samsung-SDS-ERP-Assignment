@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from langchain_core.messages import HumanMessage
 from langchain_community.callbacks import StreamlitCallbackHandler
+from langgraph.checkpoint.memory import MemorySaver
 
 # 분리한 백엔드 모듈 임포트
 from multiagent import build_graph
@@ -13,6 +14,10 @@ st.markdown("""<style>.stChatMessage { border-radius: 10px; padding: 10px; }</st
 # 2. 세션 초기화
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "안녕하세요! 서울대학교 멀티 에이전트 시스템입니다! 무엇을 도와드릴까요?"}]
+
+# 메모리 생성
+if "memory_saver" not in st.session_state:
+    st.session_state.memory_saver = MemorySaver()
 
 # Multi-turns 대화를 위한 고유 thread_id 생성
 if 'thread_id' not in st.session_state:
@@ -39,11 +44,11 @@ with st.sidebar:
         # 파일이 추가되었으므로 그래프를 재빌드하도록 플래그 설정
         st.session_state.graph_needs_update = True
 
-    if st.button("초기화", type="primary"):
-        st.session_state.messages = [{"role": "assistant", "content": "대화가 초기화되었습니다."}]
-        # 그래프 초기화(=삭제)
-        if "agent_graph" in st.session_state:
-            del st.session_state.agent_graph
+    # if st.button("초기화", type="primary"):
+    #     st.session_state.messages = [{"role": "assistant", "content": "대화가 초기화되었습니다."}]
+    #     # 그래프 초기화(=삭제)
+    #     if "agent_graph" in st.session_state:
+    #         del st.session_state.agent_graph
         
         # thread_id 새롭게 생성
         st.session_state.thread_id = str(uuid.uuid4())
@@ -54,7 +59,10 @@ with st.sidebar:
 if "agent_graph" not in st.session_state or st.session_state.get("graph_needs_update"):
     with st.spinner("멀티 에이전트 시스템을 구동 중입니다..."):
         # (multi_agent.py 내부에서 모델을 지정했으므로 경로만 넘겨줌)
-        st.session_state.agent_graph = build_graph(upload_dir=UPLOAD_DIR)
+        st.session_state.agent_graph = build_graph(
+            upload_dir=UPLOAD_DIR,
+            checkpointer=st.session_state.memory_saver
+            )
         
         st.session_state.graph_needs_update = False
         # print("Graph Rebuilt (Fixed Models)")
