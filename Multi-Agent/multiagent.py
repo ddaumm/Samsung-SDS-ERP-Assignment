@@ -39,7 +39,7 @@ def get_cot_system_prompt(agent_name, role_description):
 
     [매우 중요 - 출력 규칙]
     1. 데이터 보존 필수: 도구 실행 결과(Observation)에 **'표(Table)', '링크(URL)', '리스트'**가 포함되어 있다면, **절대 요약하거나 생략하지 마세요.**
-    2. 형식 유지: Observation에 있는 마크다운 표나 링크 형식을 Final Answer에 **그대로 복사해서 붙여넣으세요.**
+    2. 형식 변환: Observation에 있는 마크다운 표나 링크 형식을 Final Answer에 **사용자가 보기 편한 형식으로 변환하세요.**
     3. 친절한 설명: 표나 링크를 출력한 뒤에 부가적인 설명을 덧붙이세요.
     
     [주의사항]
@@ -61,7 +61,7 @@ def create_agent_node(llm, tools, system_prompt):
     return create_react_agent(llm, tools, prompt=system_prompt)
 
 # 그래프 빌더 함수
-def build_graph(upload_dir="./uploaded_docs"):
+def build_graph(upload_dir="./uploaded_docs", checkpointer=None):
     """
     설정된 모델과 업로드 폴더 경로를 받아 실행 가능한 LangGraph 객체를 반환합니다.
     """
@@ -163,5 +163,11 @@ def build_graph(upload_dir="./uploaded_docs"):
     )
 
     memory = MemorySaver()
+
+    # 외부에서 받은 checkpointer가 있으면 쓰고, 없으면 새로 생성
+    if checkpointer is None:
+        memory = MemorySaver()
+    else:
+        memory = checkpointer
 
     return workflow.compile(checkpointer=memory)
