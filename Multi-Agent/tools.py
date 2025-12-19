@@ -404,8 +404,12 @@ def search_snulife_reference(query_str):
             if int(driver.find_element(By.XPATH, '//*[@id="__next"]/div/div[2]/div[7]/div/button[3]/div').text) == 0:
                 return "족보 파일이 없습니다."
 
-            items = driver.find_elements(By.XPATH, '//*[@id="__next"]/div/div[2]/div[8]/div/div')
+            items_xpath = '//*[@id="__next"]/div/div[2]/div[8]/div/div'
+            items = driver.find_elements(By.XPATH, items_xpath)
             data = []
+
+            # debug
+            print(f"족보 항목 수: {len(items)}")
 
             # 상위 5개만 수집
             for i in range(1, min(len(items)+1, 6)):
@@ -413,26 +417,37 @@ def search_snulife_reference(query_str):
                     base = f'//*[@id="__next"]/div/div[2]/div[8]/div/div[{i}]'
                     sem = driver.find_element(By.XPATH, base+'/span').text # 연도/학기
                     name = driver.find_element(By.XPATH, base+'/div[1]/span[1]').text # 파일 제목
+
+                    # 현재 페이지 URL 저장 -> 클릭 -> URL 변경 감지 -> 수집 -> 뒤로가기
+                    list_page_url = driver.current_url # 족보 목록 페이지 URL
                     
-                    # 다운로드 링크 추출
-                    main_w = driver.current_window_handle
-                    driver.find_element(By.XPATH, base+'/div[3]/button/div').click()
-                    wait.until(EC.number_of_windows_to_be(2))
+                    # 다운로드 버튼(또는 링크) 클릭
+                    download_btn = driver.find_element(By.XPATH, base+'/div[3]/button/div')
+                    driver.execute_script("arguments[0].click();", download_btn)
+
+                    try:
+                        wait.until(EC.url_changes(list_page_url))
+                        link = driver.current_url
+
+                        driver.back()
+
+                        # 목록 페이지가 다시 로드될 때까지 대기
+                        wait.until(EC.presence_of_element_located((By.XPATH, items_xpath)))
+                        
+                        # 뒤로가기 안정화
+                        time.sleep(1) 
                     
-                    link = "Link Error"
-                    for h in driver.window_handles:
-                        if h != main_w:
-                            driver.switch_to.window(h)
-                            link = driver.current_url
-                            driver.close()
-                            break
-                    driver.switch_to.window(main_w)
-                    data.append([sem, name, link])
+                    except TimeoutException:
+                        link = list_page_url  # 링크 추출 실패 시 원래 페이지 URL로 대체
+                    
+                    markdown_link = f"[다운로드]({link})"
+
+                    data.append([sem, name, markdown_link])
                 
                 except: 
                     continue
             
-            return tabulate(data, headers=["학기", "제목", "링크"], tablefmt="grid")
+            return tabulate(data, headers=["학기", "제목", "링크"], tablefmt="pipe")
         
         else:
             return "조건에 맞는 강의의 족보를 찾지 못했습니다."
