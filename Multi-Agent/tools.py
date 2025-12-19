@@ -408,9 +408,6 @@ def search_snulife_reference(query_str):
             items = driver.find_elements(By.XPATH, items_xpath)
             data = []
 
-            # debug
-            print(f"족보 항목 수: {len(items)}")
-
             # 상위 5개만 수집
             for i in range(1, min(len(items)+1, 6)):
                 try:
