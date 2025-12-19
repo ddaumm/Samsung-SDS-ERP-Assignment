@@ -444,7 +444,7 @@ def search_snulife_reference(query_str):
                 except: 
                     continue
             
-            return tabulate(data, headers=["학기", "제목", "링크"], tablefmt="pipe")
+            return data
         
         else:
             return "조건에 맞는 강의의 족보를 찾지 못했습니다."
