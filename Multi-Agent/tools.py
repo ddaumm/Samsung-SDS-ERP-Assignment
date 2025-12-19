@@ -21,9 +21,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # 2-2. LangChain 관련
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.tools import Tool
-from langchain.tools.retriever import create_retriever_tool
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.tools import Tool
+from langchain_core.tools.retriever import create_retriever_tool
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.vectorstores import Chroma
 from langchain_google_community import GoogleSearchAPIWrapper
@@ -55,12 +55,10 @@ SCOPES = [
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 
-# ==========================================
-# [Tool 1] RAG (문서 검색) 도구 (업그레이드)
-# ==========================================
+# [Tool 1] RAG (문서 검색) 도구
 def build_rag_db(file_path):
     """
-    업로드된 파일로 벡터 DB를 구축하고, 해당 DB를 사용할 수 있는 Retriever를 반환합니다.
+    업로드된 파일로 벡터 DB를 구축하고, 해당 DB를 사용할 수 있는 Retriever를 반환.
     """
     file_name_original, file_ext = os.path.splitext(file_path)
     # 한글 파일명 등 오류 방지를 위한 해시 사용
@@ -107,7 +105,7 @@ def build_rag_db(file_path):
 
     return vectorstore.as_retriever()
 
-def create_rag_tool(file_path, encoding='utf-8', chunk_size=100, chunk_overlap=50, retriever_name="doc_search", retriever_description="문서 검색", do_extract_images=False):
+def create_rag_tool(file_path, encoding='utf-8', chunk_size=300, chunk_overlap=60, retriever_name="doc_search", retriever_description="문서 검색", do_extract_images=False):
     """
     파일 경로를 받아 즉석에서 RAG Tool을 생성하여 반환합니다.
     (기존 create_rag_tool과 build_rag_db를 통합하여 활용)
@@ -125,9 +123,7 @@ def create_rag_tool(file_path, encoding='utf-8', chunk_size=100, chunk_overlap=5
     )
 
 
-# ==========================================
-# [Helper] Google API Service Authenticator
-# ==========================================
+# Google API Service Authenticator
 def get_google_service(service_name, version):
     creds = None
     if os.path.exists('token.json'):
@@ -154,9 +150,7 @@ def get_google_service(service_name, version):
         return None
 
 
-# ==========================================
-# [Function Group 1] Gmail 관련 함수
-# ==========================================
+# Gmail 관련 함수
 def list_emails_by_keyword_and_date(service, start_date, end_date, keyword, message_num=10):
     email_list = []
     try:
@@ -228,9 +222,7 @@ def send_email(service, to, subject, body_text, file_path=None):
     except Exception as e: return f"메일 전송 실패: {e}"
 
 
-# ==========================================
-# [Function Group 2] Calendar 관련 함수
-# ==========================================
+# Calendar 관련 함수
 def list_events(service, start_date, end_date, keyword=None):
     try:
         start_dt = datetime.datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=KST)
@@ -326,9 +318,7 @@ def delete_event(service, event_id):
         return f"✅ 일정 삭제 성공 (ID: {event_id})"
     except Exception as e: return f"일정 삭제 실패: {e}"
 
-# ==========================================
-# [Function Group 3] SNULIFE 족보 검색 (Selenium)
-# ==========================================
+# SNULIFE 족보 검색 (Selenium)
 def search_snulife_reference(query_str):
     if not SNULIFE_ID or not SNULIFE_PW:
         return "오류: .env 파일에 SNULIFE 정보가 없습니다."
@@ -453,9 +443,7 @@ def search_snulife_reference(query_str):
     finally:
         driver.quit()
 
-# ==========================================
 # [Tool Wrappers] Agent용 파싱 함수들
-# ==========================================
 def gmail_search_wrapper(query_str):
     try:
         clean = query_str.strip().strip("'").strip('"')
@@ -504,12 +492,13 @@ def calendar_modify_wrapper(query_str):
 def calendar_delete_wrapper(query_str):
     return delete_event(get_google_service('calendar', 'v3'), query_str.strip().strip("'").strip('"'))
 
-# ==========================================
 # [Tool Creators] 최종 Tool 생성 함수들
-# ==========================================
 def create_gmail_tools():
     return [
-        Tool(name="gmail_search", func=gmail_search_wrapper, description="Gmail 검색. 입력: 'YYYY-MM-DD | YYYY-MM-DD | 키워드'"),
+        Tool(name="gmail_search", func=gmail_search_wrapper, description=(
+            "Gmail 검색. 입력: 'YYYY-MM-DD | YYYY-MM-DD | 키워드'"
+            "주의: 키워드에는 'in:sent', 'subject:' 같은 연산자를 절대 포함하지 말고, 오직 찾고 싶은 단어만 입력하세요."
+        )),
         Tool(name="gmail_send", func=gmail_send_wrapper, description="메일 전송. 입력: '수신자 | 제목 | 본문'")
     ]
 
@@ -531,7 +520,6 @@ def create_google_search_tool():
                 "2. 번역, 요약, 문장 다듬기\n"
                 "3. 일상적인 대화나 인사\n\n"
                 "**[사용 조건]** 오직 당신이 알 수 없는 **'최신 정보'**(오늘 날씨, 실시간 뉴스, 현재 주가 등)가 필요할 때만 사용하세요.")
-
 
 def create_snulife_tool():
     return Tool(
